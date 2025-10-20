@@ -2,7 +2,7 @@
   "name": "cinny-electron",
   "version": "1.0.0",
   "description": "",
-  "license": "AGPL3",
+  "license": "AGPL-3.0-only",
   "author": "Enova",
   "type": "module",
   "module": "system",

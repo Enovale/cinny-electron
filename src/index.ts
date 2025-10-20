@@ -2,6 +2,7 @@ import {app, shell, BrowserWindow, Menu, Tray} from 'electron'
 import path from 'path';
 import {__dirname} from "./global.ts";
 import {startQuickCSSWatch} from "./quickcss.ts";
+
 let quitting = false;
 let tray: Tray = null
 export let mainWindow: BrowserWindow = null;
@@ -19,7 +20,7 @@ const createWindow = () => {
     });
     mainWindow.webContents.setWindowOpenHandler((details) => {
         shell.openExternal(details.url);
-        return { action: 'deny' }
+        return {action: 'deny'}
     })
     mainWindow.on('close', (event) => {
         if (quitting) {
@@ -31,7 +32,9 @@ const createWindow = () => {
     });
 
     mainWindow.loadURL('https://app.cinny.in')
-        .then(url => {onReady()});
+        .then(url => {
+            onReady()
+        });
 }
 
 const onReady = () => {
@@ -42,11 +45,33 @@ const onReady = () => {
 const createTray = () => {
     tray = new Tray(path.join(__dirname, 'res/favicon.png'));
     const contextMenu = Menu.buildFromTemplate([
-        { label: 'Quit', type: 'normal', click: () => {quitApp()}}
+        {
+            label: "About",
+            click() {
+                // createAboutPage
+            }
+        },
+        {
+            type: "separator"
+        },
+        {
+            label: "Restart",
+            click() {
+                app.relaunch();
+                app.quit();
+            }
+        },
+        {
+            label: 'Quit', type: 'normal', click: () => {
+                quitApp()
+            }
+        }
     ]);
-    tray.setToolTip('This is my application.');
+    tray.setToolTip('Cinny Electron.');
     tray.setContextMenu(contextMenu);
-    tray.on('click', () => {toggleWindow()})
+    tray.on('click', () => {
+        toggleWindow()
+    })
 }
 
 const toggleWindow = () => {
@@ -64,7 +89,9 @@ const quitApp = () => {
     app.quit()
 }
 
-app.on('activate', () => { mainWindow.show() });
+app.on('activate', () => {
+    mainWindow.show()
+});
 
 app.whenReady().then(() => {
     createWindow()
