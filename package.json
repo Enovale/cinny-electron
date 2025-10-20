@@ -8,7 +8,9 @@
   "module": "system",
   "main": "src/index.ts",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package": "electron-builder",
+    "package:dir": "electron-builder --dir"
   },
   "devDependencies": {
     "electron": "^38.3.0"
