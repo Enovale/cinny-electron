@@ -1,0 +1,16 @@
+{
+  "name": "cinny-electron",
+  "version": "1.0.0",
+  "description": "",
+  "license": "AGPL3",
+  "author": "Enova",
+  "type": "module",
+  "module": "system",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^38.3.0"
+  }
+}

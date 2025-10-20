@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "module": "system",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
+  },
+}
