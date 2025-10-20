@@ -3,14 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "author": "Enova",
   "type": "module",
   "module": "system",
   "main": "src/index.ts",
   "scripts": {
-    "start": "electron .",
-    "package": "electron-builder",
-    "package:dir": "electron-builder --dir"
+    "build": "cd cinny && npm run build",
+    "start": "cd cinny && npm run start & electron .",
+    "package": "pnpm build && electron-builder",
+    "package:dir": "pnpm build && electron-builder --dir"
   },
   "devDependencies": {
     "electron": "^38.3.0",

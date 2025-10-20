@@ -7,6 +7,10 @@ import {QUICKCSS_CHANGED} from "./IpcEvents.ts";
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = dirname(__filename);
 
+let base = document.createElement('base');
+base.href = dirname(__dirname);
+//document.appendChild(base);
+
 let quickCssEvent = new Event("quickCssChanged");
 let quickCssStyle = document.createElement("style");
 

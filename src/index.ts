@@ -1,5 +1,5 @@
 import {app, shell, BrowserWindow, Menu, Tray} from 'electron'
-import path from 'path';
+import path, {dirname} from 'path';
 import {__dirname} from "./global.ts";
 import {startQuickCSSWatch} from "./quickcss.ts";
 
@@ -31,7 +31,7 @@ const createWindow = () => {
         }
     });
 
-    mainWindow.loadURL('https://app.cinny.in')
+    mainWindow.loadFile(path.join(dirname(__dirname), 'cinny/dist/index.html'))
         .then(url => {
             onReady()
         });
