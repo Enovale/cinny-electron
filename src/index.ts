@@ -1,13 +1,16 @@
-import {app, shell, BrowserWindow, Menu, Tray} from 'electron'
+import {app, ipcMain, shell, BrowserWindow, nativeImage, Menu, Tray} from 'electron'
 import path from 'path';
 import {__dirname} from "./global.ts";
 import {startQuickCSSWatch} from "./quickcss.ts";
+import {FAVICON_CHANGED} from "./IpcEvents.ts";
+import { Resvg } from "@resvg/resvg-js";
 
 let quitting = false;
 let tray: Tray = null
+let trayCache: Map<string, Electron.NativeImage> = new Map();
 export let mainWindow: BrowserWindow = null;
 
-const createWindow = () => {
+const createWindow = async () => {
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
@@ -35,6 +38,9 @@ const createWindow = () => {
         .then(url => {
             onReady()
         });
+
+    if (!app.isPackaged)
+        mainWindow.webContents.openDevTools();
 }
 
 const onReady = () => {
@@ -72,6 +78,20 @@ const createTray = () => {
     tray.on('click', () => {
         toggleWindow()
     })
+    ipcMain.on(FAVICON_CHANGED, (e, args) => {
+        let str = args as string;
+        if (trayCache.has(str)) {
+            console.log("Favicon cache hit!");
+            tray.setImage(trayCache.get(str));
+            return;
+        }
+        console.log("Favicon cache miss!");
+        let data = decodeURIComponent(str.replace("data:image/svg+xml,", ""));
+        let svg = new Resvg(data);
+        let image = nativeImage.createFromBuffer(svg.render().asPng());
+        tray.setImage(image);
+        trayCache.set(str, image);
+    })
 }
 
 const toggleWindow = () => {
@@ -93,6 +113,6 @@ app.on('activate', () => {
     mainWindow.show()
 });
 
-app.whenReady().then(() => {
-    createWindow()
+app.whenReady().then(async () => {
+    await createWindow()
 });

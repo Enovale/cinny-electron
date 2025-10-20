@@ -15,5 +15,8 @@
   "devDependencies": {
     "electron": "^38.3.0",
     "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2"
   }
 }
