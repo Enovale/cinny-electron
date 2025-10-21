@@ -1,9 +1,10 @@
 import {contextBridge} from 'electron/renderer';
 import {ipcRenderer} from 'electron';
 import {dirname, join} from 'path';
-import {readFileSync, watch} from 'fs';
+import {readFileSync} from 'fs';
 import {fileURLToPath} from "url";
 import {FAVICON_CHANGED, QUICKCSS_CHANGED} from "./IpcEvents.ts";
+
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = dirname(__filename);
 
@@ -13,7 +14,7 @@ let quickCssStyle = document.createElement("style");
 document.onreadystatechange = async (event) => {
     if (document.readyState == "complete") {
         let injected = document.createElement("script");
-        injected.innerHTML = readFileSync(join(__dirname, 'injected/index.ts')).toString();
+        injected.innerHTML = readFileSync(join(__dirname, 'injected/index.ts'), 'utf-8');
         document.body.appendChild(injected);
 
         document.head.appendChild(quickCssStyle);

@@ -1,5 +1,5 @@
 import {dirname, join} from 'path';
-import { fileURLToPath } from 'url';
+import {fileURLToPath} from 'url';
 import {app} from "electron";
 
 export const dataDir =

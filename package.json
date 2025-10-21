@@ -1,7 +1,7 @@
 {
   "name": "cinny-electron",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Unofficial Cinny Wrapper in Electron",
   "license": "AGPL-3.0-only",
   "author": "Enova",
   "type": "module",
@@ -17,6 +17,7 @@
     "electron-builder": "^26.0.12"
   },
   "dependencies": {
-    "@resvg/resvg-js": "^2.6.2"
+    "@resvg/resvg-js": "^2.6.2",
+    "electron-conf": "^1.3.0"
   }
 }

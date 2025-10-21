@@ -1,10 +1,17 @@
 import {app, ipcMain, shell, BrowserWindow, nativeImage, Menu, Tray} from 'electron'
-import path from 'path';
+import {join} from 'path';
 import {__dirname} from "./global.ts";
 import {startQuickCSSWatch} from "./quickcss.ts";
 import {FAVICON_CHANGED} from "./IpcEvents.ts";
-import { Resvg } from "@resvg/resvg-js";
+import {Resvg} from "@resvg/resvg-js";
+import {Conf} from 'electron-conf/main'
 
+const configDefault = {
+    enableQuickCSS: true,
+    url: "https://app.cinny.in",
+}
+
+let config: Conf = null;
 let quitting = false;
 let tray: Tray = null
 let trayCache: Map<string, Electron.NativeImage> = new Map();
@@ -18,13 +25,13 @@ const createWindow = async () => {
         webPreferences: {
             sandbox: false,
             spellcheck: true,
-            preload: path.join(__dirname, 'preload.ts'),
+            preload: join(__dirname, 'preload.ts'),
         }
     });
     mainWindow.webContents.setWindowOpenHandler((details) => {
         shell.openExternal(details.url);
         return {action: 'deny'}
-    })
+    });
     mainWindow.on('close', (event) => {
         if (quitting) {
             app.quit()
@@ -34,7 +41,7 @@ const createWindow = async () => {
         }
     });
 
-    mainWindow.loadURL('https://app.cinny.in')
+    mainWindow.loadURL(getURL())
         .then(url => {
             onReady()
         });
@@ -45,17 +52,16 @@ const createWindow = async () => {
 
 const onReady = () => {
     createTray()
-    startQuickCSSWatch()
+    if (config.get("enableQuickCSS", configDefault.enableQuickCSS))
+        startQuickCSSWatch()
 }
 
 const createTray = () => {
-    tray = new Tray(path.join(__dirname, 'res/favicon.png'));
+    tray = new Tray(join(__dirname, 'res/favicon.png'));
     const contextMenu = Menu.buildFromTemplate([
         {
             label: "About",
-            click() {
-                // createAboutPage
-            }
+            click: createAboutPage
         },
         {
             type: "separator"
@@ -109,10 +115,41 @@ const quitApp = () => {
     app.quit()
 }
 
+const getURL = () => {
+    return (config.get("url", configDefault.url) as string) ?? "https://app.cinny.in";
+}
+
+const createAboutPage = () => {
+    let about = new BrowserWindow({
+        width: 800,
+        height: 600,
+        center: true,
+        autoHideMenuBar: true,
+        parent: mainWindow,
+    });
+    about.webContents.setWindowOpenHandler((details) => {
+        shell.openExternal(details.url);
+        return {action: 'deny'}
+    });
+
+    const data = new URLSearchParams({
+        APP_VERSION: app.getVersion()
+    });
+
+    const view = join(__dirname, "static/about.html");
+    const url = new URL(`file://${view}`);
+    url.search = data.toString();
+    about.loadURL(url.toString());
+}
+
 app.on('activate', () => {
     mainWindow.show()
 });
 
 app.whenReady().then(async () => {
-    await createWindow()
+    config = new Conf({
+        name: "settings",
+        defaults: configDefault
+    })
+    await createWindow();
 });
