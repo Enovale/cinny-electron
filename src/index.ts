@@ -5,6 +5,7 @@ import {startQuickCSSWatch} from "./quickcss.ts";
 import {FAVICON_CHANGED} from "./IpcEvents.ts";
 import {Resvg} from "@resvg/resvg-js";
 import {Conf} from 'electron-conf/main'
+import {readFileSync} from "fs";
 
 const configDefault = {
     enableQuickCSS: true,
@@ -48,10 +49,12 @@ const createWindow = async () => {
 
     if (!app.isPackaged)
         mainWindow.webContents.openDevTools();
+
+    await mainWindow.webContents.executeJavaScript(readFileSync(join(__dirname, "takeover.js"), 'utf-8'));
 }
 
-const onReady = () => {
-    createTray()
+const onReady = async () => {
+    createTray();
     if (config.get("enableQuickCSS", configDefault.enableQuickCSS))
         startQuickCSSWatch()
 }
@@ -92,11 +95,16 @@ const createTray = () => {
             return;
         }
         console.log("Favicon cache miss!");
-        let data = decodeURIComponent(str.replace("data:image/svg+xml,", ""));
-        let svg = new Resvg(data);
-        let image = nativeImage.createFromBuffer(svg.render().asPng());
-        tray.setImage(image);
-        trayCache.set(str, image);
+        try {
+            let data = decodeURIComponent(str.replace("data:image/svg+xml,", ""));
+            let svg = new Resvg(data);
+            let image = nativeImage.createFromBuffer(svg.render().asPng());
+            tray.setImage(image);
+            trayCache.set(str, image);
+        } catch (e) {
+            console.error(e);
+            console.error(str);
+        }
     })
 }
 

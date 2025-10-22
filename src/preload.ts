@@ -13,6 +13,8 @@ let quickCssStyle = document.createElement("style");
 
 document.onreadystatechange = async (event) => {
     if (document.readyState == "complete") {
+        //if (!document.body)
+            return;
         let injected = document.createElement("script");
         injected.innerHTML = readFileSync(join(__dirname, 'injected/index.ts'), 'utf-8');
         document.body.appendChild(injected);
@@ -30,8 +32,7 @@ document.onreadystatechange = async (event) => {
             mutations.forEach(mutation => {
                 if (mutation.type === "attributes") {
                     let newValue = (mutation.target as HTMLLinkElement).href;
-                    if (!newValue.match(/\.(ico|svg|png|jpg)$/))
-                        faviconChanged(newValue);
+                    faviconChanged(newValue);
                 }
             });
         });
@@ -43,5 +44,6 @@ document.onreadystatechange = async (event) => {
 }
 
 function faviconChanged(href: string) {
-    ipcRenderer.send(FAVICON_CHANGED, href)
+    if (!href.match(/\.(ico|svg|png|jpg)$/))
+        ipcRenderer.send(FAVICON_CHANGED, href)
 }

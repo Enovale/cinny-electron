@@ -7,4 +7,5 @@ I don't know what I'm doing, beware.
 
 # Credits
 
-[Vesktop](https://github.com/Vencord/Vesktop) was used heavily as a reference
+[Vesktop](https://github.com/Vencord/Vesktop) was used heavily as a reference  
+[toonlink](https://github.com/twnlink) for the takeover injection method.
