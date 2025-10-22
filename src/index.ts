@@ -5,6 +5,7 @@ import {startQuickCSSWatch} from "./quickcss.ts";
 import {FAVICON_CHANGED} from "./IpcEvents.ts";
 import {Resvg} from "@resvg/resvg-js";
 import {Conf} from 'electron-conf/main'
+import {loadPlugins} from "./patchLoader.ts";
 
 const configDefault = {
     enableQuickCSS: true,
@@ -42,17 +43,15 @@ const createWindow = async () => {
     });
 
     let url = getURL();
-    console.log(url);
 
     protocol.handle("https", async req => {
-        console.log(req.url);
         let originalResponse = net.fetch(req, { bypassCustomProtocolHandlers: true });
         // TODO: Make this check a little less specific to the way the config is set
-        if (req.url.startsWith(url)) {
+        if (new URL(req.url).host === new URL(url).host) {
             let responseVal = await originalResponse;
             let responseStr = await responseVal.text();
             if (responseStr.match(/"Welcome to Cinny"/)) {
-                responseStr = responseStr.replace(/"Homeserver"/, "\"Patched yay!!!!!\"");
+                responseStr = responseStr.replace(/"Homeserver"/g, "\"Patched yay!!!!!\"");
             }
             return new Response(responseStr, {
                 headers: responseVal.headers,
@@ -76,7 +75,9 @@ const createWindow = async () => {
 const onReady = async () => {
     createTray();
     if (config.get("enableQuickCSS", configDefault.enableQuickCSS))
-        startQuickCSSWatch()
+        startQuickCSSWatch();
+
+    await loadPlugins();
 }
 
 const createTray = () => {
