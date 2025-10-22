@@ -5,7 +5,7 @@ import {startQuickCSSWatch} from "./quickcss.ts";
 import {FAVICON_CHANGED} from "./IpcEvents.ts";
 import {Resvg} from "@resvg/resvg-js";
 import {Conf} from 'electron-conf/main'
-import {loadPlugins} from "./patchLoader.ts";
+import {loadPlugins, replaceRegex} from "./patchLoader.ts";
 
 const configDefault = {
     enableQuickCSS: true,
@@ -46,12 +46,14 @@ const createWindow = async () => {
 
     protocol.handle("https", async req => {
         let originalResponse = net.fetch(req, { bypassCustomProtocolHandlers: true });
+        let reqUrl = new URL(req.url);
         // TODO: Make this check a little less specific to the way the config is set
-        if (new URL(req.url).host === new URL(url).host) {
+        if (reqUrl.host === new URL(url).host && reqUrl.pathname.endsWith(".js")) {
             let responseVal = await originalResponse;
             let responseStr = await responseVal.text();
-            if (responseStr.match(/"Welcome to Cinny"/)) {
-                responseStr = responseStr.replace(/"Homeserver"/g, "\"Patched yay!!!!!\"");
+            if (responseStr.match(replaceRegex(/(,\i\(\i\?\i\?\i:\i:\i\))/))) {
+            //if (responseStr.match(/"Welcome to Cinny"/)) {
+                responseStr = responseStr.replace(replaceRegex(/(,\i\((\i)\?(\i)\?\i:\i:\i\))/), (orig, match, notification, highlight) => `${orig}, console.log(\`Favicon changed. Notification: \${${notification}}, Highlight: \${${highlight}}\`)`);
             }
             return new Response(responseStr, {
                 headers: responseVal.headers,
@@ -77,7 +79,7 @@ const onReady = async () => {
     if (config.get("enableQuickCSS", configDefault.enableQuickCSS))
         startQuickCSSWatch();
 
-    await loadPlugins();
+    //await loadPlugins();
 }
 
 const createTray = () => {

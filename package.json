@@ -14,6 +14,9 @@
   },
   "main": "src/index.ts",
   "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --watch",
+    "clean": "node build.mjs --clean",
     "start": "electron .",
     "package": "electron-builder",
     "package:dir": "electron-builder --dir"

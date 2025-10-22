@@ -4,6 +4,10 @@ import {__dirname} from "./global.ts";
 
 export const pluginList = [];
 
+export function replaceRegex(match: RegExp) {
+    return new RegExp(match.source.replace(/\\i/g, "[A-Za-z_$]{1,3}[\\w$]*"), match.flags);
+}
+
 export async function loadPlugins() {
     let files = await fs.readdir(join(__dirname, 'patches/'), {
         recursive: true,
