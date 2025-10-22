@@ -1,11 +1,10 @@
-import {app, ipcMain, shell, BrowserWindow, nativeImage, Menu, Tray} from 'electron'
+import {app, protocol, net, ipcMain, shell, BrowserWindow, nativeImage, Menu, Tray} from 'electron'
 import {join} from 'path';
 import {__dirname} from "./global.ts";
 import {startQuickCSSWatch} from "./quickcss.ts";
 import {FAVICON_CHANGED} from "./IpcEvents.ts";
 import {Resvg} from "@resvg/resvg-js";
 import {Conf} from 'electron-conf/main'
-import {readFileSync} from "fs";
 
 const configDefault = {
     enableQuickCSS: true,
@@ -42,15 +41,36 @@ const createWindow = async () => {
         }
     });
 
-    mainWindow.loadURL(getURL())
+    let url = getURL();
+    console.log(url);
+
+    protocol.handle("https", async req => {
+        console.log(req.url);
+        let originalResponse = net.fetch(req, { bypassCustomProtocolHandlers: true });
+        // TODO: Make this check a little less specific to the way the config is set
+        if (req.url.startsWith(url)) {
+            let responseVal = await originalResponse;
+            let responseStr = await responseVal.text();
+            if (responseStr.match(/"Welcome to Cinny"/)) {
+                responseStr = responseStr.replace(/"Homeserver"/, "\"Patched yay!!!!!\"");
+            }
+            return new Response(responseStr, {
+                headers: responseVal.headers,
+                status: responseVal.status,
+                statusText: responseVal.statusText,
+            });
+        } else {
+            return originalResponse;
+        }
+    });
+
+    mainWindow.loadURL(url)
         .then(url => {
             onReady()
         });
 
     if (!app.isPackaged)
         mainWindow.webContents.openDevTools();
-
-    await mainWindow.webContents.executeJavaScript(readFileSync(join(__dirname, "takeover.js"), 'utf-8'));
 }
 
 const onReady = async () => {
