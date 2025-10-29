@@ -1,0 +1,12 @@
+packages:
+  - 'src/**/*'
+
+catalogs:
+  dev:
+    '@moonlight-mod/eslint-config': github:moonlight-mod/eslint-config
+    '@types/node': ^22.14.0
+    esbuild: ^0.19.3
+    esbuild-copy-static-files: ^0.1.0
+    eslint: ^9.12.0
+    prettier: ^3.1.0
+    typescript: ^5.3.3

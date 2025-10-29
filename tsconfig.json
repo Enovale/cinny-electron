@@ -1,0 +1,17 @@
+{
+  "files": [],
+  "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
+  "include": ["electron.vite.config.*",
+    "src/main/**/*",
+    "src/preload/**/*"
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@cinny-electron/core/*": ["./src/core/*"],
+      "@cinny-electron/types/*": ["./src/types/*"],
+    },
+    "composite": true,
+    "types": ["electron-vite/node", "node"]
+  }
+}
