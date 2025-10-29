@@ -16,10 +16,8 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux
-            short_name: linux
           - os: windows-latest
             platform: windows
-            short_name: win
 
     steps:
       - uses: actions/checkout@v4
@@ -50,4 +48,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.platform }}
-          path: dist/${{ matrix.short_name }}-unpacked
+          path: dist/
