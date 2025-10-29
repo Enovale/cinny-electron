@@ -21,14 +21,12 @@ export async function loadPlugins(): Promise<void> {
       try {
         const url = join(file.parentPath, file.name)
         const module = await import(url)
-        console.log(module)
         pluginList.push(module)
       } catch (e) {
         console.error(`Failed to import ${file.name}: ${e}`)
       }
     }
   }
-  console.log(files)
 }
 
 export async function replaceForSource(source: string): Promise<string> {
@@ -47,7 +45,6 @@ export async function replaceForSource(source: string): Promise<string> {
             ? patch.replace
             : [patch.replace]
           for (const replace of replacements) {
-            console.log(source.match(replaceRegex(replace.match)))
             // TODO Fix fn version
             source = source.replace(replaceRegex(replace.match), <string>replace.replacement)
           }
