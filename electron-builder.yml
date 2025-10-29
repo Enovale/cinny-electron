@@ -1,7 +1,7 @@
-appId: com.electron.app
+appId: com.enova.cinny-electron
 productName: cinny-electron
 directories:
-  buildResources: build
+  buildResources: resources
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -31,10 +31,9 @@ dmg:
 linux:
   target:
     - AppImage
-    - snap
     - deb
-  maintainer: electronjs.org
-  category: Utility
+  maintainer: Enova
+  category: Network
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
