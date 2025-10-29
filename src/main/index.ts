@@ -13,7 +13,8 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { Conf } from 'electron-conf/main'
 import { IpcEvents, loadPlugins, replaceForSource } from '@cinny-electron/core'
-import icon from '../../resources/icon.png?asset'
+import icon from '../../resources/tray-icon/cinny.png?asset'
+import { createTray } from './tray'
 
 const configDefault = {
   enableQuickCSS: true,
@@ -21,8 +22,6 @@ const configDefault = {
 }
 
 let config: Conf
-let tray: Tray = null
-const trayCache: Map<string, Electron.NativeImage> = new Map()
 
 async function createWindow(): Promise<void> {
   // Create the browser window.
@@ -75,57 +74,6 @@ async function createWindow(): Promise<void> {
   })
 
   if (is.dev) mainWindow.webContents.openDevTools()
-}
-
-function createTray(): void {
-  tray = new Tray(icon)
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'About'
-      //click: createAboutPage
-    },
-    {
-      type: 'separator'
-    },
-    {
-      label: 'Restart',
-      click() {
-        app.relaunch()
-        app.quit()
-      }
-    },
-    {
-      label: 'Quit',
-      type: 'normal',
-      click: () => {
-        quitApp()
-      }
-    }
-  ])
-  tray.setToolTip('Cinny Electron.')
-  tray.setContextMenu(contextMenu)
-  tray.on('click', () => {
-    toggleWindow()
-  })
-  ipcMain.on(IpcEvents.FAVICON_CHANGED, (e, args) => {
-    const str = args as string
-    if (trayCache.has(str)) {
-      console.log('Favicon cache hit!')
-      tray.setImage(trayCache.get(str))
-      return
-    }
-    console.log('Favicon cache miss!')
-    try {
-      const data = decodeURIComponent(str.replace('data:image/svg+xml,', ''))
-      const svg = new Resvg(data)
-      const image = nativeImage.createFromBuffer(svg.render().asPng())
-      tray.setImage(image)
-      trayCache.set(str, image)
-    } catch (e) {
-      console.error(e)
-      console.error(str)
-    }
-  })
 }
 
 function onReady(): void {
