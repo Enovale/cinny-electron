@@ -8,5 +8,10 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json --composite false",
     "build": "pnpm run typecheck"
+  },
+  "devDependencies": {
+    "eslint": "catalog:dev",
+    "prettier": "catalog:dev",
+    "typescript": "catalog:dev"
   }
 }

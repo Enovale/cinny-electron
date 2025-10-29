@@ -9,6 +9,15 @@ catalogs:
     '@types/node':
       specifier: ^22.14.0
       version: 22.18.12
+    eslint:
+      specifier: ^9.36.0
+      version: 9.38.0
+    prettier:
+      specifier: ^3.6.2
+      version: 3.6.2
+    typescript:
+      specifier: ^5.9.2
+      version: 5.9.3
 
 importers:
 
@@ -39,9 +48,6 @@ importers:
       '@electron-toolkit/tsconfig':
         specifier: ^2.0.0
         version: 2.0.0(@types/node@22.18.12)
-      '@types/node':
-        specifier: catalog:dev
-        version: 22.18.12
       electron:
         specifier: ^38.1.2
         version: 38.4.0
@@ -52,13 +58,13 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1(vite@7.1.12(@types/node@22.18.12))
       eslint:
-        specifier: ^9.36.0
+        specifier: catalog:dev
         version: 9.38.0
       prettier:
-        specifier: ^3.6.2
+        specifier: catalog:dev
         version: 3.6.2
       typescript:
-        specifier: ^5.9.2
+        specifier: catalog:dev
         version: 5.9.3
       vite:
         specifier: ^7.1.6
@@ -76,8 +82,27 @@ importers:
       '@types/node':
         specifier: catalog:dev
         version: 22.18.12
+      eslint:
+        specifier: catalog:dev
+        version: 9.38.0
+      prettier:
+        specifier: catalog:dev
+        version: 3.6.2
+      typescript:
+        specifier: catalog:dev
+        version: 5.9.3
 
-  src/types: {}
+  src/types:
+    devDependencies:
+      eslint:
+        specifier: catalog:dev
+        version: 9.38.0
+      prettier:
+        specifier: catalog:dev
+        version: 3.6.2
+      typescript:
+        specifier: catalog:dev
+        version: 5.9.3
 
 packages:
 
