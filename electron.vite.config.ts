@@ -45,13 +45,13 @@ function buildOpts(dir: string): BuildEnvironmentOptions {
         }
       },
       input: input
-    },
-    commonjsOptions: {}
+    }
   }
 }
 
 export default defineConfig({
   main: {
+    publicDir: join(__dirname, 'build'),
     optimizeDeps: optimizeDeps,
     build: buildOpts('main'),
     plugins: [externalizeDepsPlugin(exclusions), tsconfigPaths()]
