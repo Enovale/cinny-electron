@@ -1,34 +1,11 @@
-# cinny-electron
+# Cinny Desktop (Electron Version)
 
-A minimal Electron application with TypeScript
+This is a completely unofficial wrapper around [Cinny](https://github.com/cinnyapp/cinny) made in Electron,
+because Tauri works poorly for me, especially on NixOS.
 
-## Recommended IDE Setup
+I don't know what I'm doing, beware.
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+# Credits
 
-## Project Setup
-
-### Install
-
-```bash
-$ pnpm install
-```
-
-### Development
-
-```bash
-$ pnpm dev
-```
-
-### Build
-
-```bash
-# For windows
-$ pnpm build:win
-
-# For macOS
-$ pnpm build:mac
-
-# For Linux
-$ pnpm build:linux
-```
+[Vesktop](https://github.com/Vencord/Vesktop) was used heavily as a reference
+[Moonlight](https://github.com/moonlight-mod/moonlight) was also used heavily as a reference

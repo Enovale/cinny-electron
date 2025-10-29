@@ -1,9 +1,10 @@
 import { ipcMain, Menu, Tray } from 'electron'
-import { relaunch } from './util'
-import normalIcon from '../../resources/tray-icon/cinny.png?asset'
-import unreadIcon from '../../resources/tray-icon/cinny-unread.png?asset'
-import highlightIcon from '../../resources/tray-icon/cinny-highlight.png?asset'
+import { createAboutPage, relaunch } from './util'
+import normalIcon from '../../../resources/tray-icon/cinny.png?asset'
+import unreadIcon from '../../../resources/tray-icon/cinny-unread.png?asset'
+import highlightIcon from '../../../resources/tray-icon/cinny-highlight.png?asset'
 import { IpcEvents } from '@cinny-electron/core'
+import { quitApp, toggleWindow } from './index'
 
 let tray: Tray
 
@@ -24,9 +25,7 @@ export function createTray(): void {
     {
       label: 'Quit',
       type: 'normal',
-      click: () => {
-        quitApp()
-      }
+      click: quitApp
     }
   ])
   tray.setToolTip('Cinny Electron.')
@@ -34,7 +33,7 @@ export function createTray(): void {
   tray.on('click', () => {
     toggleWindow()
   })
-  ipcMain.on(IpcEvents.FAVICON_CHANGED, (e, unread: boolean, highlight: boolean) => {
+  ipcMain.on(IpcEvents.FAVICON_CHANGED, (_e, unread: boolean, highlight: boolean) => {
     tray.setImage(unread ? (highlight ? highlightIcon : unreadIcon) : normalIcon)
   })
 }

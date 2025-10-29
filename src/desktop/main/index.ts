@@ -1,31 +1,29 @@
-import {
-  app,
-  protocol,
-  net,
-  shell,
-  BrowserWindow,
-  ipcMain,
-  Tray,
-  Menu,
-  nativeImage
-} from 'electron'
+import { app, protocol, net, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { Conf } from 'electron-conf/main'
-import { IpcEvents, loadPlugins, replaceForSource } from '@cinny-electron/core'
-import icon from '../../resources/tray-icon/cinny.png?asset'
+import { loadPlugins, replaceForSource } from '@cinny-electron/core'
+import icon from '../../../resources/tray-icon/cinny.png?asset'
 import { createTray } from './tray'
+import { startQuickCSSWatch } from './quickcss'
 
 const configDefault = {
   enableQuickCSS: true,
   url: 'https://app.cinny.in'
 }
 
+export let mainWindow: BrowserWindow | undefined
+let quitting: boolean = false
+
+app.on('before-quit', () => {
+  quitting = true
+})
+
 let config: Conf
 
 async function createWindow(): Promise<void> {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
@@ -39,12 +37,22 @@ async function createWindow(): Promise<void> {
   })
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+    mainWindow?.show()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
+  })
+
+  mainWindow.on('close', (event) => {
+    if (quitting) {
+      return
+    } else {
+      event.preventDefault()
+      if (process.platform === 'darwin') app.hide()
+      else mainWindow?.hide()
+    }
   })
 
   const url = getURL()
@@ -78,6 +86,19 @@ async function createWindow(): Promise<void> {
 
 function onReady(): void {
   createTray()
+  if (config.get('enableQuickCSS', configDefault.enableQuickCSS)) startQuickCSSWatch()
+}
+
+export function toggleWindow(): void {
+  if (mainWindow?.isVisible()) mainWindow.hide()
+  else mainWindow?.show()
+}
+
+export function quitApp(): void {
+  quitting = true
+  if (mainWindow) mainWindow.close()
+
+  app.quit()
 }
 
 function getURL(): string {
@@ -103,26 +124,5 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
-
   await createWindow()
-
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
 })
-
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-})
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
