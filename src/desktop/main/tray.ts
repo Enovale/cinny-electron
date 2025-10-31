@@ -28,7 +28,7 @@ export function createTray(): void {
       click: quitApp
     }
   ])
-  tray.setToolTip('Cinny Electron.')
+  tray.setToolTip('Cinny')
   tray.setContextMenu(contextMenu)
   tray.on('click', () => {
     toggleWindow()

@@ -19,7 +19,7 @@ export async function loadPlugins(): Promise<void> {
   for (const file of files) {
     if (!file.isDirectory() && (file.name.endsWith('.js') || file.name.endsWith('.ts'))) {
       try {
-        const url = join(file.parentPath, file.name)
+        const url = 'file://' + join(file.parentPath, file.name)
         const module = await import(url)
         pluginList.push(module)
       } catch (e) {
@@ -45,8 +45,8 @@ export async function replaceForSource(source: string): Promise<string> {
             ? patch.replace
             : [patch.replace]
           for (const replace of replacements) {
-            // TODO Fix fn version
-            source = source.replace(replaceRegex(replace.match), <string>replace.replacement)
+            // @ts-ignore The type annotation of the function is just wrong?
+            source = source.replace(replaceRegex(replace.match), replace.replacement)
           }
         }
       }
