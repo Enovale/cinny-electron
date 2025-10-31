@@ -1,5 +1,5 @@
 appId: com.enova.cinny-electron
-productName: cinny-electron
+productName: Cinny
 directories:
   buildResources: resources
 files:
@@ -32,10 +32,13 @@ linux:
   target:
     - AppImage
     - deb
+    - rpm
   maintainer: Enova
   category: Network
 appImage:
   artifactName: ${name}-${version}.${ext}
+deb:
+  compression: 'gz'
 npmRebuild: false
 publish:
   provider: github

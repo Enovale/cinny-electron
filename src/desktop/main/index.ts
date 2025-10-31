@@ -1,6 +1,6 @@
 import { app, protocol, net, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { electronApp, is } from '@electron-toolkit/utils'
 import { Conf } from 'electron-conf/main'
 import { loadPlugins, replaceForSource } from '@cinny-electron/core'
 import icon from '../../../resources/tray-icon/cinny.png?asset'
@@ -113,16 +113,9 @@ function setupConfig(): void {
 }
 
 app.whenReady().then(async () => {
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId(app.name)
 
   setupConfig()
-
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
 
   await createWindow()
 })
