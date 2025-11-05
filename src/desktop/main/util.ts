@@ -4,6 +4,7 @@ import { join } from 'path'
 import xdg from '@folder/xdg'
 import { existsSync, unlink, writeFileSync } from 'fs'
 import which from 'which'
+import contextMenu from 'electron-context-menu'
 
 export const dataDir = process.env.CINNY_USER_DATA_DIR || join(app.getPath('userData'))
 
@@ -72,4 +73,11 @@ MimeType=x-scheme-handler/matrix;`
       console.error(err)
     }
   }
+}
+
+export function addWebContextMenu(window: BrowserWindow): void {
+  contextMenu({
+    window: window,
+    shouldShowMenu: (_event, parameters) => parameters.isEditable
+  })
 }

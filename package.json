@@ -27,6 +27,7 @@
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "@folder/xdg": "^4.0.1",
+    "electron-context-menu": "^4.1.1",
     "electron-store": "^11.0.2",
     "which": "^5.0.0"
   },
