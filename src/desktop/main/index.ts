@@ -6,7 +6,7 @@ import { loadPlugins, replaceForSource } from '@cinny-electron/core'
 import icon from '../../../resources/tray-icon/cinny.png?asset'
 import { createTray } from './tray'
 import { startQuickCSSWatch } from './quickcss'
-import { updateAutostart } from './util'
+import { addWebContextMenu, updateAutostart } from './util'
 
 export const configDefault = {
   enableQuickCSS: true,
@@ -60,6 +60,8 @@ async function createWindow(): Promise<void> {
       else mainWindow?.hide()
     }
   })
+
+  addWebContextMenu(mainWindow)
 
   const url = getURL()
 
