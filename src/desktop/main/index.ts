@@ -1,16 +1,24 @@
 import { app, protocol, net, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { electronApp, is } from '@electron-toolkit/utils'
-import { Conf } from 'electron-conf/main'
+import Store from 'electron-store'
 import { loadPlugins, replaceForSource } from '@cinny-electron/core'
 import icon from '../../../resources/tray-icon/cinny.png?asset'
 import { createTray } from './tray'
 import { startQuickCSSWatch } from './quickcss'
+import { updateAutostart } from './util'
 
-const configDefault = {
+export const configDefault = {
   enableQuickCSS: true,
+  autostart: false,
+  startHidden: false,
   url: 'https://app.cinny.in'
 }
+
+export const config = new Store({
+  name: 'settings',
+  defaults: configDefault
+})
 
 export let mainWindow: BrowserWindow | undefined
 let quitting: boolean = false
@@ -18,8 +26,6 @@ let quitting: boolean = false
 app.on('before-quit', () => {
   quitting = true
 })
-
-let config: Conf
 
 async function createWindow(): Promise<void> {
   // Create the browser window.
@@ -37,7 +43,7 @@ async function createWindow(): Promise<void> {
   })
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow?.show()
+    if (!config.get('startHidden')) mainWindow?.show()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -59,7 +65,7 @@ async function createWindow(): Promise<void> {
 
   await loadPlugins()
 
-  protocol.handle('https', async (req) => {
+  protocol.handle('https', async (req: GlobalRequest): Promise<Response> => {
     const originalResponse = net.fetch(req, { bypassCustomProtocolHandlers: true })
     const reqUrl = new URL(req.url)
     // TODO: Make this check a little less specific to the way the config is set
@@ -67,6 +73,7 @@ async function createWindow(): Promise<void> {
       const responseVal = await originalResponse
       let responseStr = await responseVal.text()
       responseStr = await replaceForSource(responseStr)
+      // @ts-ignore Bugged??
       return new Response(responseStr, {
         headers: responseVal.headers,
         status: responseVal.status,
@@ -86,11 +93,11 @@ async function createWindow(): Promise<void> {
 
 function onReady(): void {
   createTray()
-  if (config.get('enableQuickCSS', configDefault.enableQuickCSS)) startQuickCSSWatch()
+  if (config.get('enableQuickCSS')) startQuickCSSWatch()
 }
 
 export function toggleWindow(): void {
-  if (mainWindow?.isVisible()) mainWindow.hide()
+  if (mainWindow?.isVisible()) mainWindow!.hide()
   else mainWindow?.show()
 }
 
@@ -102,20 +109,18 @@ export function quitApp(): void {
 }
 
 function getURL(): string {
-  return (config.get('url', configDefault.url) as string) ?? 'https://app.cinny.in'
-}
-
-function setupConfig(): void {
-  config = new Conf({
-    name: 'settings',
-    defaults: configDefault
-  })
+  return (
+    process.env.CINNY_DEVELOPMENT_SERVER ??
+    config.get<string, string>('url') ??
+    'https://app.cinny.in'
+  )
 }
 
 app.whenReady().then(async () => {
   electronApp.setAppUserModelId(app.name)
 
-  setupConfig()
+  config.onDidChange('autostart', (newVal) => updateAutostart(newVal))
+  await updateAutostart(config.get('autostart')!)
 
   await createWindow()
 })

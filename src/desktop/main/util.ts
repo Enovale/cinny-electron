@@ -1,6 +1,9 @@
 import { app, BrowserWindow, shell } from 'electron'
 import { mainWindow, quitApp } from './index'
 import { join } from 'path'
+import xdg from '@folder/xdg'
+import { existsSync, unlink, writeFileSync } from 'fs'
+import which from 'which'
 
 export const dataDir = process.env.CINNY_USER_DATA_DIR || join(app.getPath('userData'))
 
@@ -31,4 +34,42 @@ export function createAboutPage(): void {
   const url = new URL(`file://${view}`)
   url.search = data.toString()
   about.loadURL(url.toString())
+}
+
+export async function updateAutostart(autostart: boolean | undefined): Promise<void> {
+  if (typeof autostart === 'undefined') return
+
+  if (process.platform != 'linux') {
+    app.setLoginItemSettings({
+      openAtLogin: autostart
+    })
+  } else {
+    try {
+      const autostartFile = join(xdg.linux().config, 'autostart', `${app.name}.desktop`)
+
+      if (autostart) {
+        if (existsSync(autostartFile)) return
+
+        writeFileSync(
+          autostartFile,
+          `[Desktop Entry]
+Name=Cinny
+Exec=${await which(app.name)} %U
+Terminal=false
+Type=Application
+Icon=${app.name}
+StartupWMClass=${app.name}
+GenericName=Internet Messenger
+Categories=Network;
+Keywords=matrix;cinny;electron;chat;
+Comment=Yet another matrix client
+MimeType=x-scheme-handler/matrix;`
+        )
+      } else {
+        if (existsSync(autostartFile)) unlink(autostartFile, () => {})
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
 }

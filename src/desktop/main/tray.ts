@@ -1,10 +1,11 @@
-import { ipcMain, Menu, Tray } from 'electron'
+import { ipcMain, Menu, shell, Tray } from 'electron'
 import { createAboutPage, relaunch } from './util'
 import normalIcon from '../../../resources/tray-icon/cinny.png?asset'
 import unreadIcon from '../../../resources/tray-icon/cinny-unread.png?asset'
 import highlightIcon from '../../../resources/tray-icon/cinny-highlight.png?asset'
 import { IpcEvents } from '@cinny-electron/core'
-import { quitApp, toggleWindow } from './index'
+import { config, quitApp, toggleWindow } from './index'
+import { quickCssPath } from './quickcss'
 
 let tray: Tray
 
@@ -14,6 +15,30 @@ export function createTray(): void {
     {
       label: 'About',
       click: createAboutPage
+    },
+    {
+      label: 'Open QuickCSS',
+      click() {
+        shell.openExternal('file://' + quickCssPath)
+      }
+    },
+    {
+      label: 'Start Minimized',
+      type: 'checkbox',
+      checked: config.get<string, boolean>('startHidden'),
+      click({ checked }) {
+        config.set('startHidden', checked)
+        updateTray(contextMenu)
+      }
+    },
+    {
+      label: 'Autostart',
+      type: 'checkbox',
+      checked: config.get<string, boolean>('autostart'),
+      click({ checked }) {
+        config.set('autostart', checked)
+        updateTray(contextMenu)
+      }
     },
     {
       type: 'separator'
@@ -36,4 +61,8 @@ export function createTray(): void {
   ipcMain.on(IpcEvents.FAVICON_CHANGED, (_e, unread: boolean, highlight: boolean) => {
     tray.setImage(unread ? (highlight ? highlightIcon : unreadIcon) : normalIcon)
   })
+}
+
+function updateTray(menu: Menu): void {
+  tray.setContextMenu(menu)
 }
