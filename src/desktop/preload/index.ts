@@ -30,7 +30,7 @@ document.onreadystatechange = async () => {
     document.head.appendChild(quickCssStyle)
 
     ipcRenderer.on(IpcEvents.QUICKCSS_CHANGED, (_e, css) => {
-      console.log('Quickcss Changed!: ', css)
+      console.log('Quickcss Changed')
       document.dispatchEvent(quickCssEvent)
       quickCssStyle.innerHTML = css
     })

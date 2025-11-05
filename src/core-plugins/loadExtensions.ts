@@ -1,8 +1,8 @@
 import { session } from 'electron'
 import { resolve } from 'path'
-import { Conf } from 'electron-conf/main'
+import Store from 'electron-store'
 
-const conf = new Conf({
+const conf = new Store({
   name: 'loadExtensions',
   defaults: {
     extensionPaths: []
