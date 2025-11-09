@@ -3,6 +3,7 @@ import { join } from 'path'
 import { mainWindow } from './index'
 import { IpcEvents } from '@cinny-electron/core'
 import { dataDir } from './util'
+import { ipcMain } from 'electron'
 
 export const quickCssPath = join(dataDir, 'quickCSS.css')
 
@@ -11,6 +12,9 @@ export function startQuickCSSWatch(): void {
   if (!existsSync(quickCssPath)) {
     writeFileSync(quickCssPath, '')
   }
+
+  // We should handle the renderer loading and resend the quickcss
+  ipcMain.on(IpcEvents.RENDERER_LOADED, () => watchCallback(null))
   watch(quickCssPath, watchCallback)
   watchCallback(null)
 }

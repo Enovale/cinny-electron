@@ -23,10 +23,10 @@ if (process.contextIsolated) {
 }
 
 const quickCssEvent = new Event('quickCssChanged')
-const quickCssStyle = document.createElement('style')
 
 document.onreadystatechange = async () => {
   if (document.readyState == 'complete') {
+    const quickCssStyle = document.createElement('style')
     document.head.appendChild(quickCssStyle)
 
     ipcRenderer.on(IpcEvents.QUICKCSS_CHANGED, (_e, css) => {
@@ -34,5 +34,7 @@ document.onreadystatechange = async () => {
       document.dispatchEvent(quickCssEvent)
       quickCssStyle.innerHTML = css
     })
+
+    ipcRenderer.send(IpcEvents.RENDERER_LOADED)
   }
 }

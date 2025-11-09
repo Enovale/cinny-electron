@@ -11,6 +11,9 @@ files:
   - '!tsconfig.json'
 asarUnpack:
   - resources/**
+protocols:
+  - name: 'Matrix URL'
+    schemes: ['matrix']
 win:
   executableName: cinny-electron
 nsis:
