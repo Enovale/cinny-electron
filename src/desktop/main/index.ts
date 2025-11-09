@@ -1,5 +1,5 @@
 import { app, protocol, net, shell, BrowserWindow } from 'electron'
-import { join } from 'path'
+import { join, resolve } from 'path'
 import { electronApp, is } from '@electron-toolkit/utils'
 import Store from 'electron-store'
 import { loadPlugins, replaceForSource } from '@cinny-electron/core'
@@ -7,6 +7,19 @@ import icon from '../../../resources/tray-icon/cinny.png?asset'
 import { createTray } from './tray'
 import { startQuickCSSWatch } from './quickcss'
 import { addWebContextMenu, updateAutostart } from './util'
+import electronUpdater, { type AppUpdater } from 'electron-updater'
+
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('matrix', process.execPath, [resolve(process.argv[1])])
+  }
+} else {
+  app.setAsDefaultProtocolClient('matrix')
+}
+
+if (!app.requestSingleInstanceLock()) {
+  app.exit()
+}
 
 export const configDefault = {
   enableQuickCSS: true,
@@ -118,11 +131,51 @@ function getURL(): string {
   )
 }
 
+// Assumed url is in format `matrix:r/roomname:homeserver?action=join`
+function handleUrlOpen(url: string | undefined): void {
+  // Someone tried to run a second instance, we should focus our window.
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    mainWindow.show()
+  }
+
+  if (url?.startsWith('matrix:')) {
+    const base = url?.slice('matrix:'.length, url?.length)
+    if (base) {
+      const room = base.split('?action=')[1]
+      // Only know how to manually deal with r/ links
+      if (!room.startsWith('r')) return
+      if (mainWindow) {
+        const url = new URL(getURL())
+        url.pathname = '/home/' + encodeURIComponent(room.replace('r/', '#'))
+        mainWindow.webContents.loadURL(url.toString())
+      }
+    }
+  }
+}
+
+// macOS handler for single instance redirection. TODO This may need different parsing.
+app.on('open-url', (_event, url) => {
+  handleUrlOpen(url)
+})
+
+app.on('second-instance', (_event, commandLine) => {
+  handleUrlOpen(commandLine.pop())
+})
+
 app.whenReady().then(async () => {
   electronApp.setAppUserModelId(app.name)
+  if (app.isPackaged) getAutoUpdater().checkForUpdatesAndNotify()
 
   config.onDidChange('autostart', (newVal) => updateAutostart(newVal))
   await updateAutostart(config.get('autostart')!)
 
   await createWindow()
 })
+
+export function getAutoUpdater(): AppUpdater {
+  // Using destructuring to access autoUpdater due to the CommonJS module of 'electron-updater'.
+  // It is a workaround for ESM compatibility issues, see https://github.com/electron-userland/electron-builder/issues/7976.
+  const { autoUpdater } = electronUpdater
+  return autoUpdater
+}

@@ -1,10 +1,10 @@
-import { ipcMain, Menu, shell, Tray } from 'electron'
+import { app, ipcMain, Menu, shell, Tray } from 'electron'
 import { createAboutPage, relaunch } from './util'
 import normalIcon from '../../../resources/tray-icon/cinny.png?asset'
 import unreadIcon from '../../../resources/tray-icon/cinny-unread.png?asset'
 import highlightIcon from '../../../resources/tray-icon/cinny-highlight.png?asset'
 import { IpcEvents } from '@cinny-electron/core'
-import { config, quitApp, toggleWindow } from './index'
+import { config, getAutoUpdater, quitApp, toggleWindow } from './index'
 import { quickCssPath } from './quickcss'
 
 let tray: Tray
@@ -42,6 +42,13 @@ export function createTray(): void {
     },
     {
       type: 'separator'
+    },
+    {
+      label: 'Check for Updates',
+      enabled: app.isPackaged,
+      click() {
+        getAutoUpdater().checkForUpdatesAndNotify()
+      }
     },
     {
       label: 'Restart',
