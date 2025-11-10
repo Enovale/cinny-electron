@@ -1,10 +1,11 @@
 import { app, BrowserWindow, shell } from 'electron'
 import { mainWindow, quitApp } from './index'
-import { join } from 'path'
+import { join, resolve } from 'path'
 import xdg from '@folder/xdg'
 import { existsSync, unlink, writeFileSync } from 'fs'
 import which from 'which'
 import contextMenu from 'electron-context-menu'
+import { electronApp } from '@electron-toolkit/utils'
 
 export const dataDir = process.env.CINNY_USER_DATA_DIR || join(app.getPath('userData'))
 
@@ -15,10 +16,11 @@ export function relaunch(): void {
 
 export function createAboutPage(): void {
   const about = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 400,
+    height: 400,
     center: true,
     autoHideMenuBar: true,
+    modal: true,
     parent: mainWindow
   })
 
@@ -41,21 +43,25 @@ export async function updateAutostart(autostart: boolean | undefined): Promise<v
   if (typeof autostart === 'undefined') return
 
   if (process.platform != 'linux') {
-    app.setLoginItemSettings({
-      openAtLogin: autostart
-    })
+    electronApp.setAutoLaunch(autostart)
   } else {
     try {
       const autostartFile = join(xdg.linux().config, 'autostart', `${app.name}.desktop`)
+      const executable =
+        process.env.APPIMAGE ??
+        (process.argv.length >= 2
+          ? `${process.execPath} ${resolve(process.argv[1])}`
+          : await which(app.name))
 
       if (autostart) {
-        if (existsSync(autostartFile)) return
+        // We should always overwrite the file because the path might change (e.g. AppImage)
+        //if (existsSync(autostartFile)) return
 
         writeFileSync(
           autostartFile,
           `[Desktop Entry]
 Name=Cinny
-Exec=${await which(app.name)} %U
+Exec=${executable} %U
 Terminal=false
 Type=Application
 Icon=${app.name}
