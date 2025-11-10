@@ -20,6 +20,9 @@ export function createAboutPage(): void {
     height: 400,
     center: true,
     autoHideMenuBar: true,
+    resizable: false,
+    maximizable: false,
+    frame: true,
     modal: true,
     parent: mainWindow
   })
