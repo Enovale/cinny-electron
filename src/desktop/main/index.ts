@@ -219,7 +219,7 @@ app.whenReady().then(async () => {
 })
 
 export function allowAutoUpdates(): boolean {
-  if (!app.isPackaged) return false
+  if (!app.isPackaged || !autoUpdater.isUpdaterActive()) return false
   // electron-builder defaults to AppImageUpdater https://github.com/electron-userland/electron-builder/blob/8e1c7ff1883103cc26b28d70b34d1a1bcc8ebd9e/packages/electron-updater/src/main.ts#L31-L32
   // If APPIMAGE is also undefined this means we are unpacked (i.e. no updates supported)
   return !(autoUpdater instanceof AppImageUpdater && !process.env.APPIMAGE)
