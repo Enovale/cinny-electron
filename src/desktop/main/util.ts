@@ -6,28 +6,27 @@ import { existsSync, unlink, writeFileSync } from 'fs'
 import which from 'which'
 import contextMenu from 'electron-context-menu'
 import { electronApp } from '@electron-toolkit/utils'
+import log from 'electron-log/main'
 
 export const dataDir = process.env.CINNY_USER_DATA_DIR || join(app.getPath('userData'))
+
+let updateWin: BrowserWindow | null = null
+const modalProps = {
+  center: true,
+  autoHideMenuBar: true,
+  resizable: false,
+  maximizable: false,
+  frame: true,
+  modal: true
+}
 
 export function relaunch(): void {
   app.relaunch()
   quitApp()
 }
 
-export function createAboutPage(): void {
-  const about = new BrowserWindow({
-    width: 400,
-    height: 400,
-    center: true,
-    autoHideMenuBar: true,
-    resizable: false,
-    maximizable: false,
-    frame: true,
-    modal: true,
-    parent: mainWindow
-  })
-
-  about.webContents.setWindowOpenHandler((details) => {
+export function openView(win: BrowserWindow, page: string): void {
+  win.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
@@ -36,10 +35,10 @@ export function createAboutPage(): void {
     APP_VERSION: app.getVersion()
   })
 
-  const view = join(__dirname, '../renderer/about/index.html')
+  const view = join(__dirname, page)
   const url = new URL(`file://${view}`)
   url.search = data.toString()
-  about.loadURL(url.toString())
+  win.loadURL(url.toString())
 }
 
 export async function updateAutostart(autostart: boolean | undefined): Promise<void> {
@@ -89,4 +88,33 @@ export function addWebContextMenu(window: BrowserWindow): void {
     window: window,
     shouldShowMenu: (_event, parameters) => parameters.isEditable
   })
+}
+
+export function aboutWindow(): void {
+  const win = new BrowserWindow({
+    width: 400,
+    height: 400,
+    parent: mainWindow,
+    ...modalProps
+  })
+  openView(win, '../renderer/about/index.html')
+}
+
+export function sendStatusToUpdaterWindow(text: string): void {
+  log.info(text)
+  updateWin?.webContents.send('status', text)
+}
+
+export function updaterWindow(): void {
+  updateWin = new BrowserWindow({
+    width: 400,
+    height: 400,
+    parent: mainWindow,
+    webPreferences: {
+      preload: join(__dirname, '../preload/updater.mjs'),
+      sandbox: false
+    },
+    ...modalProps
+  })
+  openView(updateWin, '../renderer/updater/index.html')
 }

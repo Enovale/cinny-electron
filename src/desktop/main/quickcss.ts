@@ -4,11 +4,12 @@ import { mainWindow } from './index'
 import { IpcEvents } from '@cinny-electron/core'
 import { dataDir } from './util'
 import { ipcMain } from 'electron'
+import log from 'electron-log/main'
 
 export const quickCssPath = join(dataDir, 'quickCSS.css')
 
 export function startQuickCSSWatch(): void {
-  console.log('Starting quickcss')
+  log.info('Starting quickcss')
   if (!existsSync(quickCssPath)) {
     writeFileSync(quickCssPath, '')
   }
@@ -20,6 +21,6 @@ export function startQuickCSSWatch(): void {
 }
 
 function watchCallback(e: WatchEventType | null): void {
-  console.log('quickcss access: ', e)
+  log.info('quickcss access: ', e)
   mainWindow?.webContents.send(IpcEvents.QUICKCSS_CHANGED, readFileSync(quickCssPath).toString())
 }
