@@ -7,7 +7,11 @@ import icon from '../../../resources/tray-icon/cinny.png?asset'
 import { createTray } from './tray'
 import { startQuickCSSWatch } from './quickcss'
 import { addWebContextMenu, sendStatusToUpdaterWindow, updateAutostart } from './util'
-import electronUpdater, { type AppUpdater, UpdateCheckResult } from 'electron-updater'
+import electronUpdater, {
+  AppImageUpdater,
+  type AppUpdater,
+  UpdateCheckResult
+} from 'electron-updater'
 import log from 'electron-log/main'
 
 export const configDefault = {
@@ -214,8 +218,15 @@ app.whenReady().then(async () => {
   await createWindow()
 })
 
+export function allowAutoUpdates(): boolean {
+  if (!app.isPackaged) return false
+  // electron-builder defaults to AppImageUpdater https://github.com/electron-userland/electron-builder/blob/8e1c7ff1883103cc26b28d70b34d1a1bcc8ebd9e/packages/electron-updater/src/main.ts#L31-L32
+  // If APPIMAGE is also undefined this means we are unpacked (i.e. no updates supported)
+  return !(autoUpdater instanceof AppImageUpdater && !process.env.APPIMAGE)
+}
+
 export function checkForUpdates(): Promise<UpdateCheckResult | null> {
-  if (!app.isPackaged) return new Promise(() => resolve())
+  if (!allowAutoUpdates()) return new Promise(() => resolve())
   return autoUpdater.checkForUpdatesAndNotify()
 }
 
