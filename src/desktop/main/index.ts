@@ -1,25 +1,14 @@
-import { app, protocol, net, shell, BrowserWindow } from 'electron'
+import { app, protocol, net, shell, BrowserWindow, ipcMain } from 'electron'
 import { join, resolve } from 'path'
 import { electronApp, is } from '@electron-toolkit/utils'
 import Store from 'electron-store'
-import { loadPlugins, replaceForSource } from '@cinny-electron/core'
+import { IpcEvents, loadPlugins, replaceForSource } from '@cinny-electron/core'
 import icon from '../../../resources/tray-icon/cinny.png?asset'
 import { createTray } from './tray'
 import { startQuickCSSWatch } from './quickcss'
-import { addWebContextMenu, updateAutostart } from './util'
-import electronUpdater, { type AppUpdater } from 'electron-updater'
-
-if (process.defaultApp) {
-  if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient('matrix', process.execPath, [resolve(process.argv[1])])
-  }
-} else {
-  app.setAsDefaultProtocolClient('matrix')
-}
-
-if (!app.requestSingleInstanceLock()) {
-  app.exit()
-}
+import { addWebContextMenu, sendStatusToUpdaterWindow, updateAutostart } from './util'
+import electronUpdater, { type AppUpdater, UpdateCheckResult } from 'electron-updater'
+import log from 'electron-log/main'
 
 export const configDefault = {
   enableQuickCSS: true,
@@ -35,6 +24,19 @@ export const config = new Store({
 
 export let mainWindow: BrowserWindow | undefined
 let quitting: boolean = false
+const autoUpdater = getAutoUpdater()
+
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('matrix', process.execPath, [resolve(process.argv[1])])
+  }
+} else {
+  app.setAsDefaultProtocolClient('matrix')
+}
+
+if (!app.requestSingleInstanceLock()) {
+  app.exit()
+}
 
 app.on('before-quit', () => {
   quitting = true
@@ -163,15 +165,59 @@ app.on('second-instance', (_event, commandLine) => {
   handleUrlOpen(commandLine.pop())
 })
 
+function initializeLogging(): void {
+  log.initialize()
+  log.transports.file.level = 'debug'
+  log.transports.console.level = 'info'
+  log.errorHandler.startCatching()
+
+  autoUpdater.logger = log
+}
+
 app.whenReady().then(async () => {
+  // We have to enable unsafe-eval for Cinny so we can just disable these
+  process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
+  initializeLogging()
+  log.info(`${app.name} starting...`)
+
   electronApp.setAppUserModelId(app.name)
-  if (app.isPackaged) getAutoUpdater().checkForUpdatesAndNotify()
+
+  // Set up autoupdater events
+  autoUpdater.on('checking-for-update', () => {
+    sendStatusToUpdaterWindow('Checking for update...')
+  })
+  autoUpdater.on('update-available', () => {
+    sendStatusToUpdaterWindow('Update available.')
+  })
+  autoUpdater.on('update-not-available', () => {
+    sendStatusToUpdaterWindow('Update not available.')
+  })
+  autoUpdater.on('error', (err) => {
+    sendStatusToUpdaterWindow('Error in auto-updater. ' + err)
+  })
+  autoUpdater.on('download-progress', (progressObj) => {
+    let log_message = 'Download speed: ' + progressObj.bytesPerSecond
+    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%'
+    log_message = log_message + ' (' + progressObj.transferred + '/' + progressObj.total + ')'
+    sendStatusToUpdaterWindow(log_message)
+  })
+  autoUpdater.on('update-downloaded', () => {
+    sendStatusToUpdaterWindow('Update downloaded')
+  })
+
+  ipcMain.on(IpcEvents.CHECK_UPDATES, checkForUpdates)
+  checkForUpdates()
 
   config.onDidChange('autostart', (newVal) => updateAutostart(newVal))
   await updateAutostart(config.get('autostart')!)
 
   await createWindow()
 })
+
+export function checkForUpdates(): Promise<UpdateCheckResult | null> {
+  if (!app.isPackaged) return new Promise(() => resolve())
+  return autoUpdater.checkForUpdatesAndNotify()
+}
 
 export function getAutoUpdater(): AppUpdater {
   // Using destructuring to access autoUpdater due to the CommonJS module of 'electron-updater'.

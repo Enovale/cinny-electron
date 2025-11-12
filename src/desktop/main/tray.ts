@@ -1,10 +1,10 @@
 import { app, ipcMain, Menu, shell, Tray } from 'electron'
-import { createAboutPage, relaunch } from './util'
+import { aboutWindow, relaunch, updaterWindow } from './util'
 import normalIcon from '../../../resources/tray-icon/cinny.png?asset'
 import unreadIcon from '../../../resources/tray-icon/cinny-unread.png?asset'
 import highlightIcon from '../../../resources/tray-icon/cinny-highlight.png?asset'
 import { IpcEvents } from '@cinny-electron/core'
-import { config, getAutoUpdater, quitApp, toggleWindow } from './index'
+import { checkForUpdates, config, quitApp, toggleWindow } from './index'
 import { quickCssPath } from './quickcss'
 
 let tray: Tray
@@ -14,7 +14,7 @@ export function createTray(): void {
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'About',
-      click: createAboutPage
+      click: aboutWindow
     },
     {
       label: 'Open QuickCSS',
@@ -47,7 +47,8 @@ export function createTray(): void {
       label: 'Check for Updates',
       enabled: app.isPackaged,
       click() {
-        getAutoUpdater().checkForUpdatesAndNotify()
+        updaterWindow()
+        checkForUpdates()
       }
     },
     {

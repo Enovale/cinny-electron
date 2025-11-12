@@ -2,26 +2,33 @@
 <h1>Cinny Electron v{{APP_VERSION}}</h1>
 
 <p>Unofficial Electron Wrapper for Cinny</p>
+
+<h2>Special Credits</h2>
+<a href="https://github.com/Vencord/Vesktop/" target="_blank">Vesktop</a>
+<a href="https://github.com/moonlight-mod/moonlight" target="_blank">Moonlight</a>
+<a href="https://github.com/twnlink" target="_blank">Toonlink (Helped a lot with rollup patching)</a>
 </body>
 
+<link href="index.css" rel="stylesheet" type="text/css">
+
 <script>
-  const data = new URLSearchParams(location.search);
+  const data = new URLSearchParams(location.search)
 
   // replace all {{FOO}} placeholders in the document with the values from the URL
 
   /** @param {Node} [node] */
   function walk(node) {
     if (node.nodeType === Node.TEXT_NODE) {
-      node.textContent = node.textContent.replace(/{{(\w+)}}/g, (match, key) => data.get(key) || match);
-      return;
+      node.textContent = node.textContent.replace(/{{(\w+)}}/g, (match, key) => data.get(key) || match)
+      return
     }
 
-    if (node.nodeType === Node.ELEMENT_NODE && node.nodeName !== "SCRIPT") {
+    if (node.nodeType === Node.ELEMENT_NODE && node.nodeName !== 'SCRIPT') {
       for (const child of node.childNodes) {
-        walk(child);
+        walk(child)
       }
     }
   }
 
-  walk(document.body);
+  walk(document.body)
 </script>

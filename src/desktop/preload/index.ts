@@ -1,6 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import { IpcEvents } from '@cinny-electron/core'
+import log from 'electron-log/renderer'
+
+Object.assign(console, log.functions)
 
 // Custom APIs for renderer
 const api = {}
@@ -30,7 +33,7 @@ document.onreadystatechange = async () => {
     document.head.appendChild(quickCssStyle)
 
     ipcRenderer.on(IpcEvents.QUICKCSS_CHANGED, (_e, css) => {
-      console.log('Quickcss Changed')
+      log.info('Quickcss Changed')
       document.dispatchEvent(quickCssEvent)
       quickCssStyle.innerHTML = css
     })

@@ -20,9 +20,13 @@ const files = (
 
 const optimizeDeps: DepOptimizationOptions = {}
 
-function buildOpts(dir: string): BuildEnvironmentOptions {
+function buildOpts(dir: string, ...inputs: string[]): BuildEnvironmentOptions {
   const input = {
-    index: `src/desktop/${dir}/index.ts`
+    index: `src/desktop/${dir}/index.ts`,
+    ...inputs.reduce((acc, curr) => {
+      acc[parse(curr).name] = `src/desktop/${dir}/${curr}`
+      return acc
+    }, {})
   }
   if (dir != 'preload') {
     for (const file of files) {
@@ -31,6 +35,7 @@ function buildOpts(dir: string): BuildEnvironmentOptions {
   }
 
   return {
+    sourcemap: true,
     rollupOptions: {
       output: {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -58,12 +63,13 @@ export default defineConfig({
   },
   preload: {
     optimizeDeps: optimizeDeps,
-    build: buildOpts('preload'),
+    build: buildOpts('preload', 'updater.ts'),
     plugins: [externalizeDepsPlugin(exclusions), tsconfigPaths()]
   },
   renderer: {
     root: join(__dirname, 'src/desktop/static'),
     build: {
+      sourcemap: true,
       rollupOptions: {
         input: getRendererFiles()
       }
@@ -76,10 +82,12 @@ function getRendererFiles(): Record<string, string> {
     withFileTypes: true,
     recursive: true
   }).filter((v) => v.name.endsWith('.html') || v.name.endsWith('.htm'))
+  console.log(htmlFiles)
 
   const input = {}
-  for (const file of htmlFiles) {
-    input[parse(file.name).name] = join(file.parentPath, file.name)
+  for (let i = 0; i < htmlFiles.length; i++) {
+    const file = htmlFiles[i]
+    input[parse(file.name).name + i] = join(file.parentPath, file.name)
   }
 
   return input

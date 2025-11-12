@@ -1,0 +1,22 @@
+@import url(../common.css);
+/* Very copied from Vesktop */
+
+body {
+  height: 100vh;
+
+  padding: 1.5em 1.5em 1em;
+
+  border: 1px solid var(--fg-semi-trans);
+  border-top: none;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+h1 {
+  margin: 0.4em 0 0;
+}
+
+p {
+  margin: 1em 0 2em;
+}
