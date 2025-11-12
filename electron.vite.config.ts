@@ -41,7 +41,6 @@ function buildOpts(dir: string, ...inputs: string[]): BuildEnvironmentOptions {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         manualChunks: (id) => {
-          console.log(id)
           for (const chunk of chunks) {
             if (id.includes(`/src/${chunk}/`)) {
               return chunk
@@ -82,7 +81,6 @@ function getRendererFiles(): Record<string, string> {
     withFileTypes: true,
     recursive: true
   }).filter((v) => v.name.endsWith('.html') || v.name.endsWith('.htm'))
-  console.log(htmlFiles)
 
   const input = {}
   for (let i = 0; i < htmlFiles.length; i++) {

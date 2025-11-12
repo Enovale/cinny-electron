@@ -7,14 +7,14 @@
 
 button {
   padding: 0.6em;
-  background: blue;
-  color: white;
+  background: #B2AAE9;
+  color: black;
   border-radius: 6px;
   border: none;
   cursor: pointer;
   transition: 200ms filter;
   margin-left: auto;
-  max-height: 250px;
+  align-self: self-end;
 }
 
 button:hover {
