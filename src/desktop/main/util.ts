@@ -85,8 +85,7 @@ MimeType=x-scheme-handler/matrix;`
 
 export function addWebContextMenu(window: BrowserWindow): void {
   contextMenu({
-    window: window,
-    shouldShowMenu: (_event, parameters) => parameters.isEditable
+    window: window
   })
 }
 
