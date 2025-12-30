@@ -1,8 +1,8 @@
-import { app, protocol, net, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join, resolve } from 'path'
 import { electronApp, is } from '@electron-toolkit/utils'
 import Store from 'electron-store'
-import { IpcEvents, loadPlugins, replaceForSource } from '@cinny-electron/core'
+import { IpcEvents, loadPlugins } from '@cinny-electron/core'
 import icon from '../../../resources/tray-icon/cinny.png?asset'
 import { createTray } from './tray'
 import { startQuickCSSWatch } from './quickcss'
@@ -84,13 +84,14 @@ async function createWindow(): Promise<void> {
 
   await loadPlugins()
 
-  if (app.isPackaged) {
-    // Production: app.asar/out/main/index.js -> ../../dist/index.html
-    mainWindow.loadFile(join(__dirname, '../../dist/index.html'))
-  } else {
-    // Development: project/out/main/index.js -> ../../cinny/dist/index.html
-    mainWindow.loadFile(join(__dirname, '../../cinny/dist/index.html'))
-  }
+  // Load local file and trigger onReady when done
+  const loadPromise = app.isPackaged
+    ? mainWindow.loadFile(join(__dirname, '../../dist/index.html'))
+    : mainWindow.loadFile(join(__dirname, '../../cinny/dist/index.html'))
+
+  loadPromise.then(() => {
+    onReady()
+  })
 
   if (is.dev) mainWindow.webContents.openDevTools()
 }
