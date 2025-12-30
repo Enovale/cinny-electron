@@ -9,6 +9,9 @@ files:
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml,pnpm-workspace.yaml}'
   - '!tsconfig.json'
+  - from: cinny/dist  
+    to: dist          
+    filter: ["**/*"]
 asarUnpack:
   - resources/**
 protocols:
