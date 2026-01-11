@@ -1,4 +1,13 @@
-import { app, protocol, net, shell, BrowserWindow, ipcMain } from 'electron'
+import {
+  app,
+  protocol,
+  net,
+  shell,
+  BrowserWindow,
+  ipcMain,
+  session,
+  desktopCapturer
+} from 'electron'
 import { join, resolve } from 'path'
 import { electronApp, is } from '@electron-toolkit/utils'
 import Store from 'electron-store'
@@ -185,6 +194,20 @@ app.whenReady().then(async () => {
   log.info(`${app.name} starting...`)
 
   electronApp.setAppUserModelId(app.name)
+
+  session.defaultSession.setDisplayMediaRequestHandler(
+    (_request, callback) => {
+      desktopCapturer.getSources({ types: ['screen'] }).then((sources) => {
+        // Grant access to the first screen found.
+        callback({ video: sources[0] })
+      })
+      // Use the system picker if available.
+      // Note: this is currently experimental. If the system picker
+      // is available, it will be used and the media request handler
+      // will not be invoked.
+    },
+    { useSystemPicker: true }
+  )
 
   // Set up autoupdater events
   autoUpdater.on('checking-for-update', () => {
