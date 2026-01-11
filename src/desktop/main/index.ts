@@ -199,7 +199,7 @@ app.whenReady().then(async () => {
     (_request, callback) => {
       desktopCapturer.getSources({ types: ['screen'] }).then((sources) => {
         // Grant access to the first screen found.
-        callback({ video: sources[0] })
+        callback({ video: sources[0], audio: 'loopback' })
       })
       // Use the system picker if available.
       // Note: this is currently experimental. If the system picker
