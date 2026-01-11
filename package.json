@@ -1,7 +1,7 @@
 {
   "name": "cinny-electron",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Electron wrapper around Cinny, Yet another matrix client",
   "main": "./out/main/index.js",
   "author": "Enova",
