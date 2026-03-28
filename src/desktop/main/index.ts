@@ -197,7 +197,7 @@ app.whenReady().then(async () => {
 
   session.defaultSession.setDisplayMediaRequestHandler(
     (_request, callback) => {
-      desktopCapturer.getSources({ types: ['screen'] }).then((sources) => {
+      desktopCapturer.getSources({ types: ['window','screen'] }).then((sources) => {
         // Grant access to the first screen found.
         callback({ video: sources[0], audio: 'loopback' })
       })
